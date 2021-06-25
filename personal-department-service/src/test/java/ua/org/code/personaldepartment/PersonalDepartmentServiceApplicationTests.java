@@ -1,10 +1,10 @@
-package ua.org.code.restoran;
+package ua.org.code.personaldepartment;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class RestoranApplicationTests {
+class PersonalDepartmentServiceApplicationTests {
 
     @Test
     void contextLoads() {

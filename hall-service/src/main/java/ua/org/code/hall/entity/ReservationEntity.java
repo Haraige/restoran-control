@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -18,7 +19,7 @@ public class ReservationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private UUID id;
 
     @Column(nullable = false)
     private String name;
@@ -31,7 +32,7 @@ public class ReservationEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "table_id")
-    private Table table;
+    private TableEntity tableEntity;
 
     @Column(name = "date_time_from", nullable = false)
     private LocalDateTime dateTimeFrom;

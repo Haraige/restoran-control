@@ -1,0 +1,23 @@
+server:
+  port: 9061
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: PERSONAL-DEPARTMENT-SERVICE
+          uri: lb://PERSONAL-DEPARTMENT-SERVICE
+          predicates:
+            - Path=/personal-department/**
+
+  application:
+    name: API-GATEWAY
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost

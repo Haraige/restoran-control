@@ -6,21 +6,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "halls")
-public class HallEntity {
+@Table(name = "tables")
+public class TableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
-    private List<TableEntity> tableEntities;
+    @Column(name = "waiter_id", nullable = false)
+    private UUID waiterId;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "hall_id")
+    private HallEntity hallId;
 
 }

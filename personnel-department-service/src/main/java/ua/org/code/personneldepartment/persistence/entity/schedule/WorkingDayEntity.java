@@ -14,7 +14,8 @@ import javax.persistence.*;
 import java.time.DayOfWeek;
 
 @Entity
-@Table(name = "working_days")
+@Table(name = "working_days",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"worker_id", "day_of_week"})})
 @Getter
 @Setter
 public class WorkingDayEntity {

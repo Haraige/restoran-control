@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
+import ua.org.code.personneldepartment.persistence.entity.personal.kitchen.CookerEntity;
 
 import java.time.DayOfWeek;
 import java.util.List;
@@ -21,6 +22,14 @@ public interface WaiterRepository extends JpaRepository<WaiterEntity, UUID>, Cru
     boolean existsByEmail(String email);
     boolean existsByPhoneNumber(String phoneNumber);
     boolean existsByUsername(String username);
+
+    @Query(value =
+            "select * from waiters w inner join " +
+                    "working_days wd on " +
+                    "w.id = wd.worker_id where " +
+                    "day_of_week = ?1",
+            nativeQuery = true)
+    List<WaiterEntity> findAllByDayOfWeek(String dayOfWeek);
 
     @Query(
             value = "select * from waiters as w " +

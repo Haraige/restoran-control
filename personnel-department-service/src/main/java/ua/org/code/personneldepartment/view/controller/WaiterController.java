@@ -3,11 +3,11 @@ package ua.org.code.personneldepartment.view.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import ua.org.code.personneldepartment.exception.status.RestBadRequestException;
 import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
+import ua.org.code.personneldepartment.persistence.entity.schedule.WorkingDayEntity;
 import ua.org.code.personneldepartment.service.WaiterService;
 
+import java.time.DayOfWeek;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,57 +29,43 @@ public class WaiterController {
 
     @GetMapping("/{id}")
     public WaiterEntity getWaiterById(@PathVariable UUID id) {
-
-        try {
-            return waiterService.findById(id);
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
-
+        return waiterService.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createWaiter(@RequestBody WaiterEntity waiterEntity) {
-        try {
-            waiterService.create(waiterEntity);
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
+        waiterService.create(waiterEntity);
     }
 
     @PutMapping("/{id}")
     public void updateWaiter(@PathVariable UUID id, @RequestBody WaiterEntity waiterEntity) {
-        try {
-            waiterService.update(id, waiterEntity);
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
+        waiterService.update(id, waiterEntity);
     }
 
     @DeleteMapping("/{id}")
     public void deleteWaiter(@PathVariable UUID id) {
-        try {
-            waiterService.delete(id);
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
+        waiterService.delete(id);
+    }
+
+    @GetMapping("/schedules")
+    public List<WorkingDayEntity> getAllWaitersSchedules() {
+        return waiterService.getAllWaitersWorkingDays();
+    }
+
+    @GetMapping("/schedules/{id}")
+    public List<DayOfWeek> getWaiterWorkingDays(@PathVariable UUID id) {
+        return waiterService.getWorkingDays(id);
+    }
+
+    @PostMapping("/schedules/{id}")
+    public void addWaiterWorkingDays(@PathVariable UUID id, @RequestBody List<DayOfWeek> daysOfWeek) {
+        waiterService.addWaiterWorkingDays(id, daysOfWeek);
+    }
+
+    @GetMapping("/schedules/day/{dayOfWeek}")
+    public List<WaiterEntity> getAllWaitersByDayOfWeek(@PathVariable DayOfWeek dayOfWeek) {
+        return waiterService.getAllWaitersByDayOfWeek(dayOfWeek);
     }
 
 }

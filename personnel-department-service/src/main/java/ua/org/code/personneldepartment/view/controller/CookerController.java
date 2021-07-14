@@ -3,8 +3,6 @@ package ua.org.code.personneldepartment.view.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import ua.org.code.personneldepartment.exception.status.RestBadRequestException;
 import ua.org.code.personneldepartment.persistence.entity.personal.kitchen.CookerEntity;
 import ua.org.code.personneldepartment.service.CookerService;
 
@@ -29,61 +27,22 @@ public class CookerController {
 
     @GetMapping("/{id}")
     public CookerEntity getCookerById(@PathVariable String id) {
-        try {
-            return cookerService.findById(UUID.fromString(id));
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
+        return cookerService.findById(UUID.fromString(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createCooker(@RequestBody CookerEntity cookerEntity) {
-
-        try {
-            cookerService.create(cookerEntity);
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
-
+        cookerService.create(cookerEntity);
     }
 
     @PutMapping("/{id}")
     public void updateCooker(@RequestBody CookerEntity cookerEntity, @PathVariable UUID id) {
-
-        try {
-            cookerService.update(id, cookerEntity);
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
-
+        cookerService.update(id, cookerEntity);
     }
 
     @DeleteMapping("/{id}")
     public void deleteCooker(@PathVariable UUID id) {
-
-        try {
-            cookerService.delete(id);
-        } catch (RestBadRequestException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    e.getFieldError().getMessage(),
-                    e
-            );
-        }
-
+        cookerService.delete(id);
     }
-
 }

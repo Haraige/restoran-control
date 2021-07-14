@@ -39,21 +39,21 @@ public class WaiterServiceImpl implements WaiterService {
     @Override
     public void create(WaiterEntity entity) {
         if (checkForExistDataService.existsByEmail(entity.getEmail())) {
-            log.error("Error while creating new waiter! Email {} has already been taken!", entity.getEmail());
+            log.warn("Error while creating new waiter! Email {} has already been taken!", entity.getEmail());
             throw new RestBadRequestException(
                     new FieldErrorModel("email",
                             HttpStatus.BAD_REQUEST.getReasonPhrase(),
                             "Worker with email " + entity.getEmail() + " is already present!"));
         }
         if (checkForExistDataService.existsByPhoneNumber(entity.getEmail())) {
-            log.error("Error while creating new waiter! phone number {} has already been taken!", entity.getPhoneNumber());
+            log.warn("Error while creating new waiter! phone number {} has already been taken!", entity.getPhoneNumber());
             throw new RestBadRequestException(
                     new FieldErrorModel("phoneNumber",
                             HttpStatus.BAD_REQUEST.getReasonPhrase(),
                             "Worker with phone number " + entity.getPhoneNumber() + " is already present!"));
         }
         if (checkForExistDataService.existsByUsername(entity.getUsername())) {
-            log.error("Error while creating new waiter! Username {} has already been taken!", entity.getUsername());
+            log.warn("Error while creating new waiter! Username {} has already been taken!", entity.getUsername());
             throw new RestBadRequestException(
                     new FieldErrorModel("username",
                             HttpStatus.BAD_REQUEST.getReasonPhrase(),
@@ -73,7 +73,7 @@ public class WaiterServiceImpl implements WaiterService {
 
         if (checkForExistDataService.existsByEmail(entity.getEmail()) &&
                 !updateEntity.getEmail().equals(entity.getEmail())) {
-            log.error("Error while updating waiter with id {}! Email {} has already been taken!", id, entity.getEmail());
+            log.warn("Error while updating waiter with id {}! Email {} has already been taken!", id, entity.getEmail());
             throw new RestBadRequestException(
                     new FieldErrorModel("email",
                             HttpStatus.BAD_REQUEST.getReasonPhrase(),
@@ -81,7 +81,7 @@ public class WaiterServiceImpl implements WaiterService {
         }
         if (checkForExistDataService.existsByPhoneNumber(entity.getPhoneNumber()) &&
                 !updateEntity.getPhoneNumber().equals(entity.getPhoneNumber())) {
-            log.error("Error while updating waiter with id {}! Phone number {} has already been taken!",
+            log.warn("Error while updating waiter with id {}! Phone number {} has already been taken!",
                     id, entity.getPhoneNumber());
             throw new RestBadRequestException(
                     new FieldErrorModel("phoneNumber",
@@ -90,7 +90,7 @@ public class WaiterServiceImpl implements WaiterService {
         }
         if (checkForExistDataService.existsByUsername(entity.getUsername()) &&
                 !updateEntity.getUsername().equals(entity.getUsername())) {
-            log.error("Error while updating waiter with id {}! Username {} has already been taken!",
+            log.warn("Error while updating waiter with id {}! Username {} has already been taken!",
                     id, entity.getUsername());
             throw new RestBadRequestException(
                     new FieldErrorModel("username",
@@ -113,7 +113,7 @@ public class WaiterServiceImpl implements WaiterService {
     public WaiterEntity findById(UUID id) {
         WaiterEntity waiter = waiterRepository.findById(id).orElse(null);
         if (waiter == null) {
-            log.error("Error while finding waiter!" +
+            log.warn("Error while finding waiter!" +
                     "No waiter with id {}", id);
             throw new RestBadRequestException(
                     new FieldErrorModel("id",
@@ -134,7 +134,7 @@ public class WaiterServiceImpl implements WaiterService {
     public void delete(UUID id) {
         WaiterEntity entity = waiterRepository.findById(id).orElse(null);
         if (entity == null) {
-            log.error("Error while deleting waiter!" +
+            log.warn("Error while deleting waiter!" +
                     "No waiter with id {}", id);
             throw new RestBadRequestException(
                     new FieldErrorModel("id",
@@ -147,21 +147,16 @@ public class WaiterServiceImpl implements WaiterService {
     }
 
     @Override
-    public void addWaiterWorkingDays(UUID id, List<DayOfWeek> daysOfWeek) {
-        WaiterEntity waiterEntity = findById(id);
-        List<WorkingDayEntity> workingDayEntities =
-                daysOfWeek.
-                        stream().
-                        map(dayOfWeek -> new WorkingDayEntity(waiterEntity, dayOfWeek)).
-                        collect(Collectors.toList());
-        workingDayRepository.saveAll(workingDayEntities);
+    public List<WorkingDayEntity> getAllWaitersWorkingDays() {
+        log.info("Successful getting working days of all waiters");
+        return workingDayRepository.findAllByTypeWaiter();
     }
 
     @Override
     public WaiterEntity findByUsername(String username) {
         WaiterEntity waiter = waiterRepository.findByUsername(username).orElse(null);
         if (waiter == null) {
-            log.error("Error while getting waiter by username!" +
+            log.warn("Error while getting waiter by username!" +
                     "No waiter with username {}", username);
             throw new RestBadRequestException(
                     new FieldErrorModel("username",
@@ -175,7 +170,7 @@ public class WaiterServiceImpl implements WaiterService {
     public WaiterEntity findByEmail(String email) {
         WaiterEntity waiter = waiterRepository.findByEmail(email).orElse(null);
         if (waiter == null) {
-            log.error("Error while getting waiter by username!" +
+            log.warn("Error while getting waiter by username!" +
                     "No waiter with email {}", email);
             throw new RestBadRequestException(
                     new FieldErrorModel("email",
@@ -189,7 +184,7 @@ public class WaiterServiceImpl implements WaiterService {
     public WaiterEntity findByPhoneNumber(String phoneNumber) {
         WaiterEntity waiter = waiterRepository.findByPhoneNumber(phoneNumber).orElse(null);
         if (waiter == null) {
-            log.error("Error while getting waiter by phone number!" +
+            log.warn("Error while getting waiter by phone number!" +
                     "No waiter with phone number {}", phoneNumber);
             throw new RestBadRequestException(
                     new FieldErrorModel("email",
@@ -200,17 +195,40 @@ public class WaiterServiceImpl implements WaiterService {
     }
 
     @Override
-    public List<WorkingDayEntity> getWorkingDays(UUID id) {
+    public void addWaiterWorkingDays(UUID id, List<DayOfWeek> daysOfWeek) {
+        WaiterEntity waiterEntity = findById(id);
+        daysOfWeek.removeIf(dayOfWeek -> workingDayRepository.existsByDayOfWeekAndWorkerId(dayOfWeek.name(), id.toString()));
+
+        List<WorkingDayEntity> workingDayEntities =
+                daysOfWeek.
+                        stream().
+                        map(dayOfWeek -> new WorkingDayEntity(waiterEntity, dayOfWeek)).
+                        collect(Collectors.toList());
+        workingDayRepository.saveAll(workingDayEntities);
+        log.info("Successful adding working days to waiter with id {}", id);
+    }
+
+    @Override
+    public List<DayOfWeek> getWorkingDays(UUID id) {
         if (!waiterRepository.existsById(id)) {
-            log.error("Error while getting waiters' working days!" +
+            log.warn("Error while getting waiters' working days!" +
                     "No waiter with id {}", id);
             throw new RestBadRequestException(
                     new FieldErrorModel("id",
                             HttpStatus.BAD_REQUEST.getReasonPhrase(),
                             "No waiter with id " + id));
         }
-        log.info("Successful delete waiter with id {}!", id);
-        return workingDayRepository.findAllByWorkerId(id);
+        log.info("Successful returning waiters` working days with id {}!", id);
+        return workingDayRepository.findAllByWorkerId(id.toString()).
+                stream().
+                map(WorkingDayEntity::getDayOfWeek).
+                collect(Collectors.toList());
+    }
+
+    @Override
+    public List<WaiterEntity> getAllWaitersByDayOfWeek(DayOfWeek dayOfWeek) {
+        log.info("Successful returning waiters who are working on {}!", dayOfWeek);
+        return waiterRepository.findAllByDayOfWeek(dayOfWeek.name());
     }
 
 }

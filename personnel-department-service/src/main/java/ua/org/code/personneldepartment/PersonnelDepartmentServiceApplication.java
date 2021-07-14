@@ -1,22 +1,19 @@
-package ua.org.code.hall;
+package ua.org.code.personneldepartment;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@EnableEurekaClient
-public class HallServiceApplication {
+public class PersonnelDepartmentServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HallServiceApplication.class, args);
+        SpringApplication.run(PersonnelDepartmentServiceApplication.class, args);
     }
 
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
 }

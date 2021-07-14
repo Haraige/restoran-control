@@ -1,14 +1,28 @@
 server:
   port: 9061
 
+management:
+  endpoint:
+    gateway:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: gateway
+
+
 spring:
   cloud:
     gateway:
       routes:
-        - id: PERSONAL-DEPARTMENT-SERVICE
-          uri: lb://PERSONAL-DEPARTMENT-SERVICE
+        - id: PERSONNEL-DEPARTMENT-SERVICE
+          uri: lb://PERSONNEL-DEPARTMENT-SERVICE
           predicates:
-            - Path=/personal-department/**
+            - Path=/personnel-department/**
+        - id: HALL-SERVICE
+          uri: lb://HALL-SERVICE
+          predicates:
+            - Path=/hall/**
 
   application:
     name: API-GATEWAY

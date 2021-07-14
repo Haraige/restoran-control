@@ -6,12 +6,12 @@ import ua.org.code.personneldepartment.exception.model.FieldErrorModel;
 
 import java.util.List;
 
-public class RestBadRequestException extends RestException {
+public class RestConflictException extends RestException {
 
-    public RestBadRequestException(List<FieldErrorModel> fieldErrors) {
+    public RestConflictException(List<FieldErrorModel> fieldErrors) {
         super(fieldErrors);
     }
-    public RestBadRequestException(FieldErrorModel ... fieldErrors) {
+    public RestConflictException(FieldErrorModel ... fieldErrors) {
         super(fieldErrors);
     }
 }

@@ -1,17 +1,16 @@
 package ua.org.code.personneldepartment.exception.status;
 
-
 import ua.org.code.personneldepartment.exception.base.RestException;
 import ua.org.code.personneldepartment.exception.model.FieldErrorModel;
 
 import java.util.List;
 
-public class RestBadRequestException extends RestException {
+public class RestUnauthorizedException extends RestException {
 
-    public RestBadRequestException(List<FieldErrorModel> fieldErrors) {
+    public RestUnauthorizedException(List<FieldErrorModel> fieldErrors) {
         super(fieldErrors);
     }
-    public RestBadRequestException(FieldErrorModel ... fieldErrors) {
+    public RestUnauthorizedException(FieldErrorModel ... fieldErrors) {
         super(fieldErrors);
     }
 }

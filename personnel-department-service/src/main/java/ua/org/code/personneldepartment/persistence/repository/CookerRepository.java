@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
 import ua.org.code.personneldepartment.persistence.entity.personal.kitchen.CookerEntity;
 
 import java.time.DayOfWeek;
@@ -27,6 +28,14 @@ public interface CookerRepository extends JpaRepository<CookerEntity, UUID>, Cru
     @Query(nativeQuery = true, value =
             "insert into cookers_specializations (cooker_id, specialization_id) values (?, ?)")
     void addSpecialization(UUID id, String specialization);
+
+    @Query(value =
+            "select * from cookers c inner join " +
+                    "working_days wd on " +
+                    "c.id = wd.worker_id where " +
+                    "day_of_week = ?1",
+            nativeQuery = true)
+    List<CookerEntity> findAllByDayOfWeek(DayOfWeek dayOfWeek);
 
     @Query(
             value = "select * from cookers as c " +

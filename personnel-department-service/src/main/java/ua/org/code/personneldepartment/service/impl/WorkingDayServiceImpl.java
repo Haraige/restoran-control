@@ -1,5 +1,6 @@
 package ua.org.code.personneldepartment.service.impl;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Log4j2
 public class WorkingDayServiceImpl implements WorkingDayService {
 
     private final WorkingDayRepository workingDayRepository;

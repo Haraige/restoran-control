@@ -1,6 +1,8 @@
 package ua.org.code.personneldepartment.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-@Slf4j
+@Log4j2
 @Service
 public class CookerServiceImpl implements CookerService {
 
@@ -29,7 +31,7 @@ public class CookerServiceImpl implements CookerService {
     }
 
     @Override
-    public void create(CookerEntity entity) {
+    public CookerEntity create(CookerEntity entity) {
         if (checkForExistDataService.existsByEmail(entity.getEmail())) {
             throw new RestBadRequestException(
                     new FieldErrorModel("email",
@@ -49,14 +51,11 @@ public class CookerServiceImpl implements CookerService {
                             "Worker " + entity.getUsername() + " is already present!"));
         }
 
-        entity.setId(UUID.randomUUID());
-        entity.setHiredAt(new Date());
-
-        cookerRepository.save(entity);
+        return cookerRepository.save(entity);
     }
 
     @Override
-    public void update(UUID id, CookerEntity entity) {
+    public CookerEntity update(UUID id, CookerEntity entity) {
         CookerEntity updateEntity = findById(id);
 
         if (checkForExistDataService.existsByEmail(entity.getEmail()) &&
@@ -94,8 +93,7 @@ public class CookerServiceImpl implements CookerService {
         updateEntity.setSalary(entity.getSalary());
         updateEntity.setCookerSpecializations(entity.getCookerSpecializations());
         updateEntity.setUsername(entity.getUsername());
-        updateEntity.setPassword(entity.getPassword());
-        cookerRepository.save(updateEntity);
+        return cookerRepository.save(updateEntity);
     }
 
     @Override

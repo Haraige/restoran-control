@@ -4,10 +4,10 @@ package ua.org.code.hall.service;
 import java.util.List;
 import java.util.UUID;
 
-public interface CRUDService<ENTITY> {
-    void create(ENTITY entity);
-    void update(ENTITY entity);
-    ENTITY findById(Integer id);
+public interface CRUDService<ENTITY, ID> {
+    ENTITY create(ENTITY entity);
+    ENTITY update(ID id, ENTITY entity);
+    ENTITY findById(ID id);
     List<ENTITY> getAll();
-    void delete(Integer id);
+    void delete(ID id);
 }

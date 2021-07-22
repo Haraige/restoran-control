@@ -1,5 +1,6 @@
 package ua.org.code.personneldepartment.service.impl;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.org.code.personneldepartment.persistence.repository.CookerRepository;
@@ -7,6 +8,7 @@ import ua.org.code.personneldepartment.persistence.repository.WaiterRepository;
 import ua.org.code.personneldepartment.service.PersonnelCheckForExistDataService;
 
 @Service
+@Log4j2
 public class PersonnelCheckForExistDataServiceImpl implements PersonnelCheckForExistDataService {
 
     private final CookerRepository cookerRepository;

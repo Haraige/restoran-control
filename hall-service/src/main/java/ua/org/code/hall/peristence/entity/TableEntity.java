@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -13,14 +14,27 @@ import java.util.UUID;
 public class TableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "waiter_id", nullable = false)
+    @Column(name = "waiter_id")
     private UUID waiterId;
+
+    @Column(nullable = false)
+    private boolean free;
+
+    @Column(name = "customers_capacity", nullable = false)
+    private Integer customersCapacity;
+
+    public TableEntity(Integer id, UUID waiterId) {
+        this.id = id;
+        this.waiterId = waiterId;
+        this.free = true;
+    }
 
     public TableEntity(UUID waiterId) {
         this.waiterId = waiterId;
+        this.free = true;
     }
 
     public TableEntity() {

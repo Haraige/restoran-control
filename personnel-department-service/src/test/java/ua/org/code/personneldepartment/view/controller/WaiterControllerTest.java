@@ -8,16 +8,9 @@ import ua.org.code.personneldepartment.persistence.repository.WaiterRepository;
 import ua.org.code.personneldepartment.persistence.repository.WorkingDayRepository;
 import ua.org.code.personneldepartment.service.PersonnelCheckForExistDataService;
 import ua.org.code.personneldepartment.service.WaiterService;
-import ua.org.code.personneldepartment.service.impl.PersonnelCheckForExistDataServiceImpl;
-import ua.org.code.personneldepartment.service.impl.WaiterServiceImpl;
 
 import java.util.Date;
 import java.util.UUID;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
 class WaiterControllerTest {

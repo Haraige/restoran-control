@@ -6,9 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import ua.org.code.personneldepartment.persistence.entity.schedule.WorkingDayEntity;
 
-import java.time.DayOfWeek;
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 public interface WorkingDayRepository extends

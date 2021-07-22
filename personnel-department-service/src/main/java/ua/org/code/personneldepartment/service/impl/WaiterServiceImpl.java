@@ -3,7 +3,7 @@ package ua.org.code.personneldepartment.service.impl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ua.org.code.personneldepartment.exception.model.FieldErrorModel;
@@ -16,7 +16,8 @@ import ua.org.code.personneldepartment.service.PersonnelCheckForExistDataService
 import ua.org.code.personneldepartment.service.WaiterService;
 
 import java.time.DayOfWeek;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Log4j2

@@ -2,8 +2,6 @@ package ua.org.code.personneldepartment.persistence.entity.personal.kitchen;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import ua.org.code.personneldepartment.persistence.entity.personal.Personnel;

@@ -2,21 +2,15 @@ package ua.org.code.personneldepartment.view.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
 import ua.org.code.personneldepartment.persistence.entity.schedule.WorkingDayEntity;
 import ua.org.code.personneldepartment.service.WaiterService;
 import ua.org.code.personneldepartment.view.dto.waiter.WaiterBasicDto;
 
-import javax.annotation.security.RolesAllowed;
 import java.time.DayOfWeek;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;

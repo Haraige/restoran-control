@@ -1,7 +1,5 @@
 package ua.org.code.personneldepartment.service.impl;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +11,6 @@ import ua.org.code.personneldepartment.persistence.repository.CookerRepository;
 import ua.org.code.personneldepartment.service.CookerService;
 import ua.org.code.personneldepartment.service.PersonnelCheckForExistDataService;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 

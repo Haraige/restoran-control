@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ua.org.code.hall.peristence.entity.TableEntity;
 import ua.org.code.hall.service.TableManageService;
-import ua.org.code.hall.view.VO.WaiterBasicVO;
 
 import java.util.Date;
 import java.util.List;

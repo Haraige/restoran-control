@@ -1,23 +1,25 @@
 package ua.org.code.hall.peristence.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "reservations")
 public class ReservationEntity {
 
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
     private UUID id;
 
     @Column(nullable = false)
@@ -33,9 +35,30 @@ public class ReservationEntity {
     @JoinColumn(name = "table_id")
     private TableEntity tableEntity;
 
-    @Column(name = "date_time_from", nullable = false)
-    private LocalDateTime dateTimeFrom;
+    @Column(name = "client_present", nullable = false)
+    private Boolean clientPresent;
 
-    @Column(name = "date_time_to")
-    private LocalDateTime dateTimeTo;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "date_time_from", nullable = false)
+    private Date dateTimeFrom;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "date_time_to", nullable = false)
+    private Date dateTimeTo;
+
+    public ReservationEntity(String name,
+                             String surname,
+                             String phoneNumber,
+                             TableEntity tableEntity,
+                             Date dateTimeFrom) {
+        this.name = name;
+        this.surname = surname;
+        this.phoneNumber = phoneNumber;
+        this.tableEntity = tableEntity;
+        this.clientPresent = false;
+        this.dateTimeFrom = dateTimeFrom;
+    }
+
+    public ReservationEntity() {
+    }
 }

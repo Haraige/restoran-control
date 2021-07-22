@@ -14,7 +14,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CookerRepository extends JpaRepository<CookerEntity, UUID>, CrudRepository<CookerEntity, UUID> {
+public interface CookerRepository extends
+        JpaRepository<CookerEntity, UUID>,
+        CrudRepository<CookerEntity, UUID> {
 
     Optional<CookerEntity> findByEmail(String email);
     Optional<CookerEntity> findByPhoneNumber(String phoneNumber);

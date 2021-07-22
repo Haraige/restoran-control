@@ -2,9 +2,12 @@ package ua.org.code.personneldepartment.persistence.entity.personal.hall;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import ua.org.code.personneldepartment.persistence.entity.personal.Personnel;
-import ua.org.code.personneldepartment.persistence.role.RoleType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -13,11 +16,17 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@ToString
 @Table(name = "waiters")
 public class WaiterEntity implements Personnel {
 
     @Id
     @Type(type = "uuid-char")
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
     private UUID id;
 
     @Column(nullable = false)
@@ -42,26 +51,25 @@ public class WaiterEntity implements Personnel {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
-    private char[] password;
-
     @Column(name = "hired_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date hiredAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private final RoleType role = RoleType.ROLE_WAITER;
+    @PrePersist
+    protected void onCreate() {
+        this.hiredAt = new Date();
+    }
 
-    public WaiterEntity(String name,
+    public WaiterEntity(UUID id,
+                        String name,
                         String surname,
                         Date dateOfBirth,
                         String email,
                         String phoneNumber,
                         Integer salary,
                         String username,
-                        char[] password) {
-        this.id = UUID.randomUUID();
+                        Date hiredAt) {
+        this.id = id;
         this.name = name;
         this.surname = surname;
         this.dateOfBirth = dateOfBirth;
@@ -69,8 +77,23 @@ public class WaiterEntity implements Personnel {
         this.phoneNumber = phoneNumber;
         this.salary = salary;
         this.username = username;
-        this.password = password;
-        this.hiredAt = new Date();
+        this.hiredAt = hiredAt;
+    }
+
+    public WaiterEntity(String name,
+                        String surname,
+                        Date dateOfBirth,
+                        String email,
+                        String phoneNumber,
+                        Integer salary,
+                        String username) {
+        this.name = name;
+        this.surname = surname;
+        this.dateOfBirth = dateOfBirth;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.salary = salary;
+        this.username = username;
     }
 
     public WaiterEntity() {

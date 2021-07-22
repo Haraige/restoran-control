@@ -2,18 +2,28 @@ package ua.org.code.personneldepartment.view.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
 import ua.org.code.personneldepartment.persistence.entity.schedule.WorkingDayEntity;
 import ua.org.code.personneldepartment.service.WaiterService;
+import ua.org.code.personneldepartment.view.dto.waiter.WaiterBasicDto;
 
+import javax.annotation.security.RolesAllowed;
 import java.time.DayOfWeek;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/personnel-department/waiters")
-public class WaiterController {
+public class WaiterController implements SecuredRestController {
 
     private final WaiterService waiterService;
 
@@ -22,8 +32,11 @@ public class WaiterController {
         this.waiterService = waiterService;
     }
 
-    @GetMapping()
+    @GetMapping
     public List<WaiterEntity> getAllWaiters() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        authentication.getAuthorities().forEach(a -> System.out.println(a.getAuthority()));
+
         return waiterService.getAll();
     }
 
@@ -32,15 +45,20 @@ public class WaiterController {
         return waiterService.findById(id);
     }
 
+    @GetMapping("/username/{username}")
+    public WaiterEntity getWaiterByUsername(@PathVariable String username) {
+        return waiterService.findByUsername(username);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createWaiter(@RequestBody WaiterEntity waiterEntity) {
-        waiterService.create(waiterEntity);
+    public WaiterEntity createWaiter(@RequestBody WaiterEntity waiterEntity) {
+        return waiterService.create(waiterEntity);
     }
 
     @PutMapping("/{id}")
-    public void updateWaiter(@PathVariable UUID id, @RequestBody WaiterEntity waiterEntity) {
-        waiterService.update(id, waiterEntity);
+    public WaiterEntity updateWaiter(@PathVariable UUID id, @RequestBody WaiterEntity waiterEntity) {
+        return waiterService.update(id, waiterEntity);
     }
 
     @DeleteMapping("/{id}")
@@ -64,8 +82,11 @@ public class WaiterController {
     }
 
     @GetMapping("/schedules/day/{dayOfWeek}")
-    public List<WaiterEntity> getAllWaitersByDayOfWeek(@PathVariable DayOfWeek dayOfWeek) {
-        return waiterService.getAllWaitersByDayOfWeek(dayOfWeek);
+    public List<WaiterBasicDto> getAllBasicWaitersByDayOfWeek(@PathVariable DayOfWeek dayOfWeek) {
+        return waiterService.getAllWaitersByDayOfWeek(dayOfWeek).
+                stream().
+                map(WaiterBasicDto::new).
+                collect(Collectors.toList());
     }
 
 }

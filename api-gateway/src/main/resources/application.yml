@@ -12,6 +12,8 @@ management:
 
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   cloud:
     gateway:
       routes:
@@ -23,9 +25,34 @@ spring:
           uri: lb://HALL-SERVICE
           predicates:
             - Path=/hall/**
+      default-filters:
+        - TokenRelay
+      discovery:
+        locator:
+          enabled: true
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/auth/realms/Restaurant
+            token-uri: http://localhost:8080/auth/realms/Restaurant/protocol/openid-connect/token
+            authorization-uri: http://localhost:8080/auth/realms/Restaurant/protocol/openid-connect/auth
+            userinfo-uri: http://localhost:8080/auth/realms/Restaurant/protocol/openid-connect/userinfo
+            user-name-attribute: preferred_username
+        registration:
+          api-gateway-client:
+            client-name: personnel-auth
+            provider: keycloak
+            client-id: gateway-client
+            client-secret: 35e0c793-5bf6-4cb1-8406-db404be31d5c
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:9061/login/oauth2/code/gateway-client"
+
 
   application:
     name: API-GATEWAY
+
 
 eureka:
   client:

@@ -1,25 +1,25 @@
 package ua.org.code.personneldepartment.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import ua.org.code.personneldepartment.exception.model.FieldErrorModel;
 import ua.org.code.personneldepartment.exception.status.RestBadRequestException;
 import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
 import ua.org.code.personneldepartment.persistence.entity.schedule.WorkingDayEntity;
-import ua.org.code.personneldepartment.persistence.repository.WorkingDayRepository;
 import ua.org.code.personneldepartment.persistence.repository.WaiterRepository;
+import ua.org.code.personneldepartment.persistence.repository.WorkingDayRepository;
 import ua.org.code.personneldepartment.service.PersonnelCheckForExistDataService;
 import ua.org.code.personneldepartment.service.WaiterService;
 
 import java.time.DayOfWeek;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
+@Log4j2
 @Service
 public class WaiterServiceImpl implements WaiterService {
 
@@ -27,17 +27,23 @@ public class WaiterServiceImpl implements WaiterService {
     private final WorkingDayRepository workingDayRepository;
     private final PersonnelCheckForExistDataService checkForExistDataService;
 
+    private final RestTemplate restTemplate;
+
+    @Value("keycloak.admin-cli.client-secret")
+    String adminCliSecret;
+
     @Autowired
     public WaiterServiceImpl(WaiterRepository waiterRepository,
                              WorkingDayRepository workingDayRepository,
-                             PersonnelCheckForExistDataService checkForExistDataService) {
+                             PersonnelCheckForExistDataService checkForExistDataService, RestTemplate restTemplate) {
         this.waiterRepository = waiterRepository;
         this.workingDayRepository = workingDayRepository;
         this.checkForExistDataService = checkForExistDataService;
+        this.restTemplate = restTemplate;
     }
 
     @Override
-    public void create(WaiterEntity entity) {
+    public WaiterEntity create(WaiterEntity entity) {
         if (checkForExistDataService.existsByEmail(entity.getEmail())) {
             log.warn("Error while creating new waiter! Email {} has already been taken!", entity.getEmail());
             throw new RestBadRequestException(
@@ -45,7 +51,7 @@ public class WaiterServiceImpl implements WaiterService {
                             HttpStatus.BAD_REQUEST.getReasonPhrase(),
                             "Worker with email " + entity.getEmail() + " is already present!"));
         }
-        if (checkForExistDataService.existsByPhoneNumber(entity.getEmail())) {
+        if (checkForExistDataService.existsByPhoneNumber(entity.getPhoneNumber())) {
             log.warn("Error while creating new waiter! phone number {} has already been taken!", entity.getPhoneNumber());
             throw new RestBadRequestException(
                     new FieldErrorModel("phoneNumber",
@@ -60,15 +66,38 @@ public class WaiterServiceImpl implements WaiterService {
                             "Worker with username " + entity.getUsername() + " is already present!"));
         }
 
-        entity.setId(UUID.randomUUID());
-        entity.setHiredAt(new Date());
+        /*MultiValueMap<String, String> getTokenRequestMap = new LinkedMultiValueMap<>();
+        getTokenRequestMap.add("client_id", "admin-cli");
+        getTokenRequestMap.add("grant_type", "client_credentials");
+        getTokenRequestMap.add("client_secret", adminCliSecret);
 
+        String token = (new RestTemplate()).postForObject(
+                "http://localhost:8080/auth/realms/Restaurant/protocol/openid-connect/token",
+                getTokenRequestMap, String.class);*/ //Doesn't work!! Returning 401 [No body]
+
+
+        /*Map<String, String> requestMap = Map.of(
+                "firstName", entity.getName(),
+                "lastName", entity.getSurname(),
+                "username", entity.getUsername(),
+                "email", entity.getEmail()
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(bearerToken);
+
+        HttpEntity<Map<String, String>> requestBody = new HttpEntity<>(requestMap, headers);
+
+        ResponseEntity<String> createWaiterResponseEntity = restTemplate.postForEntity(
+                "http://localhost:8080/auth/admin/realms/Restaurant/users/", requestBody, String.class);
+
+        System.out.println(createWaiterResponseEntity);*/
         log.info("Successful creating waiter with id {}", entity.getId());
-        waiterRepository.save(entity);
+        return waiterRepository.save(entity);
     }
 
     @Override
-    public void update(UUID id, WaiterEntity entity) {
+    public WaiterEntity update(UUID id, WaiterEntity entity) {
         WaiterEntity updateEntity = findById(id);
 
         if (checkForExistDataService.existsByEmail(entity.getEmail()) &&
@@ -105,8 +134,7 @@ public class WaiterServiceImpl implements WaiterService {
         updateEntity.setDateOfBirth(entity.getDateOfBirth());
         updateEntity.setSalary(entity.getSalary());
         updateEntity.setUsername(entity.getUsername());
-        updateEntity.setPassword(entity.getPassword());
-        waiterRepository.save(updateEntity);
+        return waiterRepository.save(updateEntity);
     }
 
     @Override

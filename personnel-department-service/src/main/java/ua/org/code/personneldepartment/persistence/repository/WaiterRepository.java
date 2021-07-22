@@ -13,7 +13,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface WaiterRepository extends JpaRepository<WaiterEntity, UUID>, CrudRepository<WaiterEntity, UUID> {
+public interface WaiterRepository extends
+        JpaRepository<WaiterEntity, UUID>,
+        CrudRepository<WaiterEntity, UUID>{
 
     Optional<WaiterEntity> findByEmail(String email);
     Optional<WaiterEntity> findByPhoneNumber(String phoneNumber);

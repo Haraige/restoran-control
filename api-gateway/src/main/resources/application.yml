@@ -45,10 +45,9 @@ spring:
             client-name: personnel-auth
             provider: keycloak
             client-id: gateway-client
-            client-secret: 35e0c793-5bf6-4cb1-8406-db404be31d5c
+            client-secret: b28a8ff6-d867-44af-a01d-d802b5533da7
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:9061/login/oauth2/code/gateway-client"
-
+            redirect-uri: "http://localhost:9061/login/oauth2/code/keycloak"
 
   application:
     name: API-GATEWAY

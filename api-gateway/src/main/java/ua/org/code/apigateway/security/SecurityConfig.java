@@ -21,9 +21,7 @@ public class SecurityConfig {
                 ServerWebExchangeMatchers.pathMatchers(
                         "/personnel-department/swagger-ui.html",
                         "/hall/swagger-ui.html")))
-                .authorizeExchange()
-                .anyExchange()
-                .authenticated().and()
+                .authorizeExchange(exchanges -> exchanges.anyExchange().authenticated())
                 .oauth2Login(withDefaults());
         return http.build();
     }

@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import ua.org.code.personneldepartment.exception.model.FieldErrorModel;
 import ua.org.code.personneldepartment.exception.status.RestBadRequestException;
@@ -15,6 +17,8 @@ import ua.org.code.personneldepartment.persistence.repository.WorkingDayReposito
 import ua.org.code.personneldepartment.service.PersonnelCheckForExistDataService;
 import ua.org.code.personneldepartment.service.WaiterService;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +48,7 @@ public class WaiterServiceImpl implements WaiterService {
     }
 
     @Override
-    public WaiterEntity create(WaiterEntity entity) {
+    public WaiterEntity create( WaiterEntity entity) {
         if (checkForExistDataService.existsByEmail(entity.getEmail())) {
             log.warn("Error while creating new waiter! Email {} has already been taken!", entity.getEmail());
             throw new RestBadRequestException(
@@ -67,32 +71,6 @@ public class WaiterServiceImpl implements WaiterService {
                             "Worker with username " + entity.getUsername() + " is already present!"));
         }
 
-        /*MultiValueMap<String, String> getTokenRequestMap = new LinkedMultiValueMap<>();
-        getTokenRequestMap.add("client_id", "admin-cli");
-        getTokenRequestMap.add("grant_type", "client_credentials");
-        getTokenRequestMap.add("client_secret", adminCliSecret);
-
-        String token = (new RestTemplate()).postForObject(
-                "http://localhost:8080/auth/realms/Restaurant/protocol/openid-connect/token",
-                getTokenRequestMap, String.class);*/ //Doesn't work!! Returning 401 [No body]
-
-
-        /*Map<String, String> requestMap = Map.of(
-                "firstName", entity.getName(),
-                "lastName", entity.getSurname(),
-                "username", entity.getUsername(),
-                "email", entity.getEmail()
-        );
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(bearerToken);
-
-        HttpEntity<Map<String, String>> requestBody = new HttpEntity<>(requestMap, headers);
-
-        ResponseEntity<String> createWaiterResponseEntity = restTemplate.postForEntity(
-                "http://localhost:8080/auth/admin/realms/Restaurant/users/", requestBody, String.class);
-
-        System.out.println(createWaiterResponseEntity);*/
         log.info("Successful creating waiter with id {}", entity.getId());
         return waiterRepository.save(entity);
     }

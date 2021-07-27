@@ -28,9 +28,6 @@ public class WaiterController implements SecuredRestController {
 
     @GetMapping
     public List<WaiterEntity> getAllWaiters() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        authentication.getAuthorities().forEach(a -> System.out.println(a.getAuthority()));
-
         return waiterService.getAll();
     }
 

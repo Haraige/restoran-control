@@ -1,27 +1,24 @@
 package ua.org.code.personneldepartment.service.impl;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import ua.org.code.personneldepartment.constants.KeycloakRolesConstants;
 import ua.org.code.personneldepartment.exception.model.FieldErrorModel;
 import ua.org.code.personneldepartment.exception.status.RestBadRequestException;
 import ua.org.code.personneldepartment.persistence.entity.personal.hall.WaiterEntity;
 import ua.org.code.personneldepartment.persistence.entity.schedule.WorkingDayEntity;
 import ua.org.code.personneldepartment.persistence.repository.WaiterRepository;
 import ua.org.code.personneldepartment.persistence.repository.WorkingDayRepository;
+import ua.org.code.personneldepartment.service.KeycloakService;
 import ua.org.code.personneldepartment.service.PersonnelCheckForExistDataService;
 import ua.org.code.personneldepartment.service.WaiterService;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import java.time.DayOfWeek;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -31,24 +28,22 @@ public class WaiterServiceImpl implements WaiterService {
     private final WaiterRepository waiterRepository;
     private final WorkingDayRepository workingDayRepository;
     private final PersonnelCheckForExistDataService checkForExistDataService;
-
-    private final RestTemplate restTemplate;
-
-    @Value("keycloak.admin-cli.client-secret")
-    String adminCliSecret;
+    private final KeycloakService keycloakService;
 
     @Autowired
     public WaiterServiceImpl(WaiterRepository waiterRepository,
                              WorkingDayRepository workingDayRepository,
-                             PersonnelCheckForExistDataService checkForExistDataService, RestTemplate restTemplate) {
+                             PersonnelCheckForExistDataService checkForExistDataService,
+                             KeycloakService keycloakService) {
         this.waiterRepository = waiterRepository;
         this.workingDayRepository = workingDayRepository;
         this.checkForExistDataService = checkForExistDataService;
-        this.restTemplate = restTemplate;
+        this.keycloakService = keycloakService;
     }
 
     @Override
-    public WaiterEntity create( WaiterEntity entity) {
+    @Transactional
+    public WaiterEntity create(WaiterEntity entity) {
         if (checkForExistDataService.existsByEmail(entity.getEmail())) {
             log.warn("Error while creating new waiter! Email {} has already been taken!", entity.getEmail());
             throw new RestBadRequestException(
@@ -71,11 +66,24 @@ public class WaiterServiceImpl implements WaiterService {
                             "Worker with username " + entity.getUsername() + " is already present!"));
         }
 
+        String userPassword = RandomStringUtils.random(10, true, true);
+        keycloakService.createUserWithRole(entity.getName(),
+                entity.getSurname(),
+                entity.getEmail(),
+                entity.getUsername(),
+                userPassword,
+                KeycloakRolesConstants.WAITER_ROLE_REPRESENTATION
+                );
+
+        entity.setPassword(userPassword);
+        entity.setKeycloakId(keycloakService.getUserIdByUsername(entity.getUsername()));
+
         log.info("Successful creating waiter with id {}", entity.getId());
         return waiterRepository.save(entity);
     }
 
     @Override
+    @Transactional
     public WaiterEntity update(UUID id, WaiterEntity entity) {
         WaiterEntity updateEntity = findById(id);
 
@@ -113,6 +121,15 @@ public class WaiterServiceImpl implements WaiterService {
         updateEntity.setDateOfBirth(entity.getDateOfBirth());
         updateEntity.setSalary(entity.getSalary());
         updateEntity.setUsername(entity.getUsername());
+
+        keycloakService.updateUserInfo(updateEntity.getKeycloakId(),
+                updateEntity.getName(),
+                updateEntity.getSurname(),
+                updateEntity.getEmail(),
+                updateEntity.getUsername());
+
+        log.info("Successful updating waiter with id {}", entity.getId());
+
         return waiterRepository.save(updateEntity);
     }
 
@@ -138,6 +155,7 @@ public class WaiterServiceImpl implements WaiterService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         WaiterEntity entity = waiterRepository.findById(id).orElse(null);
         if (entity == null) {
@@ -150,6 +168,7 @@ public class WaiterServiceImpl implements WaiterService {
         }
 
         log.info("Successful delete waiter with id {}", id);
+        keycloakService.deleteUser(entity.getKeycloakId());
         waiterRepository.delete(entity);
     }
 

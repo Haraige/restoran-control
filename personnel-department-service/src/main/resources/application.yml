@@ -1,0 +1,46 @@
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+keycloak:
+  admin-cli:
+    client-secret: 9310afc9-16f1-4f73-9391-126cfa8d1a1b
+  host: localhost
+  port: 8080
+  realm: Restaurant
+  uri: http://${keycloak.host}:${keycloak.port}/auth
+server:
+  error:
+    include-message: always
+  port: 8086
+spring:
+  application:
+    name: PERSONNEL-DEPARTMENT-SERVICE
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/restaurant_personal_department
+    username: postgres
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  jpa:
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  profiles:
+    active: test
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/auth/realms/Restaurant
+springdoc:
+  swagger-ui:
+    path: /personnel-department/swagger-ui.html

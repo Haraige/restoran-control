@@ -27,6 +27,10 @@ public class WaiterEntity implements Personnel {
     )
     private UUID id;
 
+    @Column(name = "keycloak_id")
+    @Type(type = "uuid-char")
+    private UUID keycloakId;
+
     @Column(nullable = false)
     private String name;
 
@@ -48,6 +52,9 @@ public class WaiterEntity implements Personnel {
 
     @Column(nullable = false, unique = true)
     private String username;
+
+    @Transient
+    private String password;
 
     @Column(name = "hired_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

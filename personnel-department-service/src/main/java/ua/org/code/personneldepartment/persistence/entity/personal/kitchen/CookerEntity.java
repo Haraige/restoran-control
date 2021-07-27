@@ -25,6 +25,10 @@ public class CookerEntity implements Personnel {
     )
     private UUID id;
 
+    @Column(name = "keycloak_id")
+    @Type(type = "uuid-char")
+    private UUID keycloakId;
+
     @Column(nullable = false)
     private String name;
 
@@ -46,6 +50,9 @@ public class CookerEntity implements Personnel {
 
     @Column(nullable = false, unique = true)
     private String username;
+
+    @Transient
+    private String password;
 
     @Column(name = "hired_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)

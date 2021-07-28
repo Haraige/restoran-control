@@ -11,30 +11,35 @@ import org.springframework.web.client.RestTemplate;
 import ua.org.code.hall.exception.model.FieldErrorModel;
 import ua.org.code.hall.exception.status.RestBadRequestException;
 import ua.org.code.hall.exception.status.RestConflictException;
+import ua.org.code.hall.peristence.entity.ReservationEntity;
 import ua.org.code.hall.peristence.entity.TableEntity;
+import ua.org.code.hall.peristence.repository.ReservationRepository;
 import ua.org.code.hall.peristence.repository.TableManageRepository;
 import ua.org.code.hall.service.TableManageService;
 import ua.org.code.hall.view.VO.WaiterBasicVO;
+import ua.org.code.hall.view.dto.ReservationWithTableIdDto;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Log4j2
 public class TableManageServiceImpl implements TableManageService {
 
     private final TableManageRepository tableManageRepository;
+    private final ReservationRepository reservationRepository;
 
     private final RestTemplate restTemplate;
 
     @Autowired
-    public TableManageServiceImpl(TableManageRepository tableManageRepository, RestTemplate restTemplate) {
+    public TableManageServiceImpl(TableManageRepository tableManageRepository, ReservationRepository reservationRepository, RestTemplate restTemplate) {
         this.tableManageRepository = tableManageRepository;
+        this.reservationRepository = reservationRepository;
         this.restTemplate = restTemplate;
     }
 
@@ -50,7 +55,6 @@ public class TableManageServiceImpl implements TableManageService {
         TableEntity updateEntity = findById(id);
 
         updateEntity.setCustomersCapacity(tableEntity.getCustomersCapacity());
-        updateEntity.setFree(tableEntity.isFree());
         updateEntity.setWaiterId(tableEntity.getWaiterId());
 
         log.info("Successful updating table with id {}", id);
@@ -88,44 +92,63 @@ public class TableManageServiceImpl implements TableManageService {
     }
 
     @Override
-    public void reserveTable(Integer id) {
-        TableEntity table = findById(id);
-        if (!table.isFree()) {
-            log.warn("Error while reserving table. Table with id {} already reserved", id);
-            throw new RestConflictException(
-                    new FieldErrorModel("id",
-                    HttpStatus.CONFLICT.getReasonPhrase(),
-                    "Table with id {} already reserved", id));
-        }
-        log.info("Successful reserve table with id {}", id);
-        tableManageRepository.setTableFreeById(id, false);
-    }
+    public ReservationEntity reserveTable(ReservationWithTableIdDto reservation) {
+        TableEntity table = findById(reservation.getTableId());
 
-    @Override
-    public void freeTable(Integer id) {
-        TableEntity table = findById(id);
-        if (table.isFree()) {
-            log.warn("Error while free table. Table with id {} already free", id);
+        if (getAllFreeTablesFromDateToDate(reservation.getDateFrom(), reservation.getDateTo())
+                .stream()
+                .noneMatch(entity -> entity.getId().equals(table.getId()))) {
+            log.warn("Error while reserving table. Table with id {} already reserved on date {} to {}",
+                    table.getId(), reservation.getDateFrom(), reservation.getDateTo());
             throw new RestConflictException(
                     new FieldErrorModel("id",
                             HttpStatus.CONFLICT.getReasonPhrase(),
-                            "Table with id {} already free", id));
+                            "Table with id {} already reserved", table.getId()));
         }
-        log.info("Successful free table with id {}", id);
-        tableManageRepository.setTableFreeById(id, true);
+
+        log.info("Successful reserve table with id {}", table.getId());
+
+        ReservationEntity entity = new ReservationEntity(
+                reservation.getName(),
+                reservation.getSurname(),
+                reservation.getPhoneNumber(),
+                table,
+                reservation.getDateFrom(),
+                reservation.getDateTo()
+        );
+
+        return reservationRepository.save(entity);
+    }
+
+    @Override
+    public void setCustomerFinishedTrue(UUID reservationId) {
+        log.info("Successful set customer finished true to reservation with id");
+        reservationRepository.setCustomerFinishedTrue(reservationId);
+    }
+
+    @Override
+    @Scheduled(fixedRate = 60000)
+    @PostConstruct
+    public void freeTables() {
+        List<ReservationEntity> reservations = reservationRepository.findReservationEntitiesWhereCustomerNotCame(15);
+        reservations.forEach(reservation -> reservationRepository.setCustomerAbsentTrue(reservation.getId()));
     }
 
     @Override
     @Scheduled(cron = "0 5 0 * * *")
     @Transactional
     public void refreshAllWaitersTables() {
-        List<WaiterBasicVO> currentDayWaiters = getCurrentDayWaiters();
+        List<WaiterBasicVO> currentDayWaiters = this.getCurrentDayWaiters();
         List<TableEntity> tables = getAll();
 
-        if (currentDayWaiters.isEmpty()) {
-            log.warn("No waiters for current day! Set waiters for {}", LocalDate.now().getDayOfWeek());
+        if (currentDayWaiters.size() == 0) {
             tables.forEach(entity -> tableManageRepository.setTableWaiterById(entity.getId(), null));
-            return;
+            log.warn("No waiters for current day! Set waiters for {}", LocalDate.now().getDayOfWeek());
+            throw new RestConflictException (
+                    new FieldErrorModel("",
+                            HttpStatus.CONFLICT.getReasonPhrase(),
+                            "No waiters for day" + LocalDate.now().getDayOfWeek())
+            );
         }
         int tablesPerWaiter = tables.size() / currentDayWaiters.size();
         int remainingTables = tables.size() % currentDayWaiters.size();
@@ -147,20 +170,18 @@ public class TableManageServiceImpl implements TableManageService {
     }
 
     @Override
-    public List<TableEntity> getAllFreeTablesFromDateToDate(Date from, Date to) {
+    public List<TableEntity> getAllFreeTablesFromDateToDate(LocalDateTime from, LocalDateTime to) {
         log.info("Successful getting all free tables from {} to {} date",
-                DateTimeFormatter.ISO_DATE_TIME.format(from.toInstant()),
-                DateTimeFormatter.ISO_DATE_TIME.format(to.toInstant()));
+                DateTimeFormatter.ISO_DATE_TIME.format(from),
+                DateTimeFormatter.ISO_DATE_TIME.format(to));
         return tableManageRepository.getTableEntitiesByFreeIsTrueFromAndTo(from, to);
     }
 
-    private List<WaiterBasicVO> getCurrentDayWaiters() {
+    @Override
+    public List<WaiterBasicVO> getCurrentDayWaiters() {
         DayOfWeek currentDay = LocalDate.now().getDayOfWeek();
 
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-                .forEach(s -> System.out.println(s.getAuthority()));
 
         String bearerToken = jwt.getTokenValue();
 
@@ -172,6 +193,10 @@ public class TableManageServiceImpl implements TableManageService {
                 "http://PERSONNEL-DEPARTMENT-SERVICE/personnel-department/waiters/schedules/day/" + currentDay,
                 HttpMethod.GET, httpEntity, WaiterBasicVO[].class);
 
+        if (responseEntity.getBody() == null) {
+            log.warn("No waiters for day {}", currentDay);
+            return new ArrayList<>();
+        }
         return List.of(Objects.requireNonNull(responseEntity.getBody()));
     }
 }

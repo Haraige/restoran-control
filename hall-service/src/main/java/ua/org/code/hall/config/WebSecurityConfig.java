@@ -14,9 +14,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests(authorize -> authorize
-                .antMatchers("/hall/waiters/**")
+                .antMatchers("/hall/refresh")
+                .hasAnyAuthority("SCOPE_ADMIN")
+                .antMatchers("/hall/waiters/**", "/hall/finished/**")
                 .hasAnyAuthority("SCOPE_WAITER", "SCOPE_ADMIN")
-                .antMatchers("/hall/reserve", "/hall/swagger-ui.html")
+                .antMatchers("/hall/reserve", "/hall/tables/free/**", "/hall/swagger-ui.html")
                 .permitAll()
                 .antMatchers("/hall/waiters/**")
                 .authenticated())

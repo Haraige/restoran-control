@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import ua.org.code.hall.peristence.entity.TableEntity;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -16,14 +17,15 @@ public interface TableManageRepository extends
         JpaRepository<TableEntity, Integer>,
         CrudRepository<TableEntity, Integer> {
 
-    @Modifying
-    @Query("update TableEntity t set t.free = :free where t.id = :id")
-    void setTableFreeById(Integer id, boolean free);
-
-    @Query("select t from TableEntity t inner join " +
-            "ReservationEntity r where " +
-            "r.dateTimeFrom < :dateFrom and r.dateTimeTo > :dateTo")
-    List<TableEntity> getTableEntitiesByFreeIsTrueFromAndTo(Date dateFrom, Date dateTo);
+    @Query("select t from TableEntity t where not exists (select r from ReservationEntity r where r.tableEntity=t) " +
+            "or exists (" +
+            "select r from ReservationEntity r where " +
+            "((r.dateTimeFrom >= :dateFrom and r.dateTimeTo >= :dateFrom " +
+            "and r.dateTimeFrom >= :dateTo and r.dateTimeTo >= :dateTo) " +
+            "or (r.dateTimeFrom <= :dateFrom and r.dateTimeTo <= :dateFrom " +
+            "and r.dateTimeFrom <= :dateTo and r.dateTimeTo <= :dateTo))" +
+            "and (r.customerAbsent=true or r.customerFinished=true))")
+    List<TableEntity> getTableEntitiesByFreeIsTrueFromAndTo(LocalDateTime dateFrom, LocalDateTime dateTo);
 
     @Modifying
     @Query("update TableEntity t set t.waiterId = :waiterId where t.id = :tableId")

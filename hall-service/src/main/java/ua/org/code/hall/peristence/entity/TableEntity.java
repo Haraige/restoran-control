@@ -13,27 +13,28 @@ import java.util.UUID;
 public class TableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "id_in_hall", nullable = false)
+    private Integer idInHall;
 
     @Column(name = "waiter_id")
     private UUID waiterId;
 
-    @Column(nullable = false)
-    private boolean free;
-
     @Column(name = "customers_capacity", nullable = false)
     private Integer customersCapacity;
 
-    public TableEntity(Integer id, UUID waiterId) {
+    public TableEntity(Integer id, Integer idInHall, UUID waiterId, Integer customersCapacity) {
         this.id = id;
+        this.idInHall = idInHall;
         this.waiterId = waiterId;
-        this.free = true;
+        this.customersCapacity = customersCapacity;
     }
 
-    public TableEntity(UUID waiterId) {
-        this.waiterId = waiterId;
-        this.free = true;
+    public TableEntity(Integer idInHall, Integer customersCapacity) {
+        this.idInHall = idInHall;
+        this.customersCapacity = customersCapacity;
     }
 
     public TableEntity() {

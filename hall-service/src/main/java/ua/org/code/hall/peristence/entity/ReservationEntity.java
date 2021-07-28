@@ -2,9 +2,11 @@ package ua.org.code.hall.peristence.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.tomcat.jni.Local;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,28 +37,50 @@ public class ReservationEntity {
     @JoinColumn(name = "table_id")
     private TableEntity tableEntity;
 
-    @Column(name = "client_present", nullable = false)
-    private Boolean clientPresent;
+    @Column(name = "customer_finished", nullable = false)
+    private Boolean customerFinished;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "customer_absent")
+    private Boolean customerAbsent;
+
     @Column(name = "date_time_from", nullable = false)
-    private Date dateTimeFrom;
+    private LocalDateTime dateTimeFrom;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date_time_to", nullable = false)
-    private Date dateTimeTo;
+    private LocalDateTime dateTimeTo;
+
+    public ReservationEntity(UUID id,
+                             String name,
+                             String surname,
+                             String phoneNumber,
+                             TableEntity tableEntity,
+                             LocalDateTime dateTimeFrom,
+                             LocalDateTime dateTimeTo) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.phoneNumber = phoneNumber;
+        this.tableEntity = tableEntity;
+        this.customerAbsent = false;
+        this.customerFinished = false;
+        this.dateTimeFrom = dateTimeFrom;
+        this.dateTimeTo = dateTimeTo;
+    }
 
     public ReservationEntity(String name,
                              String surname,
                              String phoneNumber,
                              TableEntity tableEntity,
-                             Date dateTimeFrom) {
+                             LocalDateTime dateTimeFrom,
+                             LocalDateTime dateTimeTo) {
         this.name = name;
         this.surname = surname;
         this.phoneNumber = phoneNumber;
         this.tableEntity = tableEntity;
-        this.clientPresent = false;
+        this.customerAbsent = false;
+        this.customerFinished = false;
         this.dateTimeFrom = dateTimeFrom;
+        this.dateTimeTo = dateTimeTo;
     }
 
     public ReservationEntity() {

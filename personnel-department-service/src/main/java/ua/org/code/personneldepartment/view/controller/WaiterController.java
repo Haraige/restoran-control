@@ -62,12 +62,12 @@ public class WaiterController implements SecuredRestController {
         return waiterService.getAllWaitersWorkingDays();
     }
 
-    @GetMapping("/schedules/{id}")
+    @GetMapping("/{id}/schedules")
     public List<DayOfWeek> getWaiterWorkingDays(@PathVariable UUID id) {
         return waiterService.getWorkingDays(id);
     }
 
-    @PostMapping("/schedules/{id}")
+    @PostMapping("/{id}/schedules")
     public void addWaiterWorkingDays(@PathVariable UUID id, @RequestBody List<DayOfWeek> daysOfWeek) {
         waiterService.addWaiterWorkingDays(id, daysOfWeek);
     }
